@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auslandssemester Fortschritts‑Tracker</title>
+  <title>Fortschritts‑Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -347,7 +347,7 @@
       percentLine.textContent = `${fmt2(pct)} % vergingen`;
 
       // Fraction x/y (reduce based on rounded percent of 100)
-      let P = Math.round(pct); // 0..100
+      let P = pct.toFixed(2); // 0..100
       let num = P, den = 100;
       const g = gcd(num, den);
       num = num / g; den = den / g;
