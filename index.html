@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auslandssemester Fortschritts‑Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;         /* slate-900 */
+      --card: #0b1224cc;     /* translucent dark */
+      --card-border: #1e293b;/* slate-800 */
+      --txt: #e2e8f0;        /* slate-200 */
+      --muted: #94a3b8;      /* slate-400 */
+      --accent: #22d3ee;     /* cyan-400 */
+      --ring: #60a5fa;       /* blue-400 */
+      --success: #34d399;    /* emerald-400 */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 50% -10%, #1f2937, transparent),
+                  radial-gradient(1000px 600px at 120% 120%, #0ea5e9, transparent),
+                  linear-gradient(160deg, #0b1020, #111827 50%, #0b1020 100%);
+      color: var(--txt);
+      display: grid;
+      place-items: center;
+      padding: 32px 16px;
+    }
+
+    .wrap {
+      width: min(860px, 92vw);
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+    }
+
+    .controls {
+      width: 80%;
+      display: flex;
+	  flex-direction: column;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input[type="datetime-local"], input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 1rem;
+      color: var(--txt);
+      background: #0b1224;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input[type="datetime-local"]:focus, input[type="text"]:focus {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 6px #3b82f620; /* blue-500/12 */
+    }
+
+    .card {
+      width: min(680px, 92vw);
+      min-height: 420px; /* eher höher und länglicher */
+      margin: 10px auto 0;
+      background: linear-gradient(180deg, #0b1224, #0a0f1f);
+      border: 1px solid var(--card-border);
+      border-radius: 22px; /* abgerundete Ecken */
+      box-shadow: 0 20px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+      padding: 26px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: -40% -20% auto auto;
+      width: 480px; height: 480px;
+      background: radial-gradient(closest-side, #1e293b, transparent 70%);
+      opacity: .4;
+      z-index: -1;
+      filter: blur(10px);
+    }
+
+    .title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 1rem + 1.4vw, 1.8rem);
+      letter-spacing: 0.2px;
+    }
+
+    .title .badge {
+      font-size: .85rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      background: #0a122280;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      background: #0b1224cc;
+    }
+
+    .row .label { color: var(--muted); font-size: .95rem; }
+    .row .value { font-weight: 700; font-size: 1.05rem; }
+
+    .progress {
+      width: 100%;
+      height: 14px;
+      background: #0a1020;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      transition: width .5s ease;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .hint { color: var(--muted); font-size: .85rem; text-align: center; }
+
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: 1fr; }
+      .card { min-height: 460px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="controls" role="group" aria-label="Zeitraum einstellen">
+      <div class="field">
+        <label for="name">Titel</label>
+        <input id="name" type="text" placeholder="Name der Aktivität" />
+      </div>
+      <div class="field"></div>
+      <div class="field">
+        <label for="start">Start</label>
+        <input id="start" type="datetime-local" />
+      </div>
+      <div class="field">
+        <label for="end">Ende</label>
+        <input id="end" type="datetime-local" />
+      </div>
+    </div>
+
+    <div class="card" aria-live="polite">
+      <div class="title">
+        <h1 id="card-title">Fortschritt</h1>
+        <span class="badge" id="badge">–</span>
+      </div>
+
+      <div class="stats">
+        <div class="row">
+          <div class="label">Tag</div>
+          <div class="value" id="day-line">–</div>
+        </div>
+        <div class="row">
+          <div class="label">Stunde</div>
+          <div class="value" id="hour-line">–</div>
+        </div>
+        <div class="row">
+          <div class="label">Prozent</div>
+          <div class="value" id="percent-line">–</div>
+        </div>
+        <div class="row">
+          <div class="label">x/y vergingen</div>
+          <div class="value" id="frac-line">–</div>
+        </div>
+        <div class="row">
+          <div class="label">1/y vergingen</div>
+          <div class="value" id="invfrac-line">–</div>
+        </div>
+		<div class="row">
+          <div class="label">Halfway-Time:</div>
+          <div class="value" id="hwt-line">–</div>
+        </div>
+		<div class="row">
+          <div class="label">Quarterway-Time:</div>
+          <div class="value" id="qwt-line">–</div>
+        </div>
+		<div class="row">
+          <div class="label">Eightway-Time:</div>
+          <div class="value" id="awt-line">–</div>
+        </div>
+		<div class="row">
+          <div class="label">Sexteenway-Time:</div>
+          <div class="value" id="swt-line">–</div>
+        </div>
+        <div class="progress" aria-label="Fortschrittsbalken">
+          <div class="bar" id="bar"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div id="time-left">–</div>
+        <div id="now">–</div>
+      </div>
+    </div>
+
+    <p class="hint">Tipp: Start & Ende setzen. Deine Eingaben werden lokal im Browser gespeichert.</p>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    const nameInput = el('name');
+    const startInput = el('start');
+    const endInput = el('end');
+
+    const titleEl = el('card-title');
+    const badgeEl = el('badge');
+    const dayLine = el('day-line');
+    const hourLine = el('hour-line');
+    const percentLine = el('percent-line');
+    const fracLine = el('frac-line');
+    const invFracLine = el('invfrac-line');
+    const bar = el('bar');
+    const timeLeft = el('time-left');
+    const nowEl = el('now');
+
+    const STORAGE_KEY = 'semester-tracker-v1';
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.name) nameInput.value = s.name;
+        if (s.start) startInput.value = s.start;
+        if (s.end) endInput.value = s.end;
+      } catch(_) {}
+    }
+
+    function saveState() {
+      const s = {
+        name: nameInput.value.trim(),
+        start: startInput.value,
+        end: endInput.value,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    }
+
+    nameInput.addEventListener('input', saveState);
+    startInput.addEventListener('change', saveState);
+    endInput.addEventListener('change', saveState);
+
+    function fmt2(n) { return Number.isFinite(n) ? n.toFixed(2) : '0.00'; }
+
+    function gcd(a, b) {
+      a = Math.abs(a); b = Math.abs(b);
+      if (!a) return b; if (!b) return a;
+      while (b) { const t = b; b = a % b; a = t; }
+      return a;
+    }
+
+    function update() {
+      const name = nameInput.value.trim();
+      titleEl.textContent = name || 'Fortschritt';
+
+      const start = startInput.value ? new Date(startInput.value) : null;
+      const end = endInput.value ? new Date(endInput.value) : null;
+      const now = new Date();
+      nowEl.textContent = new Intl.DateTimeFormat('de-AT', { dateStyle: 'medium', timeStyle: 'medium' }).format(now);
+
+      if (!(start && end) || end <= start) {
+        badgeEl.textContent = 'Zeitraum wählen';
+        dayLine.textContent = '–';
+        hourLine.textContent = '–';
+        percentLine.textContent = '–';
+        fracLine.textContent = '–';
+        invFracLine.textContent = '–';
+        bar.style.width = '0%';
+        timeLeft.textContent = '—';
+        return;
+      }
+
+      const totalMs = end - start;
+      const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
+      const remainingMs = totalMs - elapsedMs;
+
+      // Days
+      const dayMs = 24 * 60 * 60 * 1000;
+      const totalDays = Math.ceil(totalMs / dayMs);
+      const currDay = Math.min(Math.floor(elapsedMs / dayMs) + (elapsedMs > 0 ? 1 : 0), totalDays);
+      const elapsedDays = Math.floor(elapsedMs / dayMs);
+      dayLine.textContent = `Tag ${currDay} / ${totalDays}, ${totalDays - elapsedDays} Tage übrig`;
+
+      // Hours
+      const hourMs = 60 * 60 * 1000;
+      const totalHours = Math.ceil(totalMs / hourMs);
+      const currHour = Math.min(Math.floor(elapsedMs / hourMs) + (elapsedMs > 0 ? 1 : 0), totalHours);
+      const elapsedHours = Math.floor(elapsedMs / hourMs);
+      hourLine.textContent = `Stunde ${currHour} / ${totalHours}, ${totalHours - elapsedHours} Stunden übrig`;
+
+      // Percent
+      const pct = (elapsedMs / totalMs) * 100;
+      percentLine.textContent = `${fmt2(pct)} % vergingen`;
+
+      // Fraction x/y (reduce based on rounded percent of 100)
+      let P = Math.round(pct); // 0..100
+      let num = P, den = 100;
+      const g = gcd(num, den);
+      num = num / g; den = den / g;
+      fracLine.textContent = `${fmt2(num)} / ${fmt2(den)} vergingen`;
+
+      // Inverse fraction 1/y (1 / (100/P))
+      let invY = (P === 0) ? Infinity : (100 / P);
+      invFracLine.textContent = (P === 0) ? '—' : `1 / ${fmt2(invY)} vergingen`;
+	  
+	  // Halfway-Time & Quarterway-Time
+	  
+	  function formatDateTime(date) {
+        return date.toLocaleDateString("de-DE") + " " + date.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+      }
+
+	  const sixteenTime = new Date(start.getTime() + (end - start) * 0.25 * 0.25);
+	  const eightTime = new Date(start.getTime() + (end - start) * 0.25 * 0.5);
+	  const quarterTime = new Date(start.getTime() + (end - start) * 0.25);
+	  const halfwayTime = new Date(start.getTime() + (end - start) * 0.5);
+	  
+	  // Für sixteenTime
+	  document.querySelector("#swt-line").innerText = `${formatDateTime(sixteenTime)} — ${( (elapsedMs / totalMs) * 100 * 16 ).toFixed(2)}%`;
+
+	  // Für eightTime
+	  document.querySelector("#awt-line").innerText = `${formatDateTime(eightTime)} — ${( (elapsedMs / totalMs) * 100 * 8 ).toFixed(2)}%`;
+
+	  // für Quarter
+	  document.querySelector("#qwt-line").innerText = `${formatDateTime(quarterTime)} — ${( (elapsedMs / totalMs) * 100 * 4 ).toFixed(2)}%`;
+
+	  // für Halfway
+	  document.querySelector("#hwt-line").innerText = `${formatDateTime(halfwayTime)} — ${( (elapsedMs / totalMs) * 100 * 2 ).toFixed(2)}%`;
+
+      // Progress bar
+      bar.style.width = `${(elapsedMs / totalMs) * 100}%`;
+
+      // Badge + time left
+      const totalFmt = new Intl.RelativeTimeFormat('de', { numeric: 'auto' });
+      const dLeft = Math.ceil(remainingMs / dayMs);
+      const started = now >= start;
+      const finished = now >= end;
+      if (!started) {
+        badgeEl.textContent = 'Noch nicht gestartet';
+        timeLeft.textContent = `Startet in ${totalFmt.format(Math.round((start - now) / dayMs), 'day')}`;
+      } else if (finished) {
+        badgeEl.textContent = 'Abgeschlossen';
+        timeLeft.textContent = `Beendet am ${new Intl.DateTimeFormat('de-AT', { dateStyle: 'medium', timeStyle: 'short' }).format(end)}`;
+      } else {
+        badgeEl.textContent = 'Läuft';
+        const days = Math.floor(remainingMs / dayMs);
+        const hours = Math.floor((remainingMs % dayMs) / hourMs);
+        const minutes = Math.floor((remainingMs % hourMs) / (60*1000));
+        timeLeft.textContent = `${days} T, ${hours} Std, ${minutes} Min übrig`;
+      }
+    }
+
+    // Kickoff
+    loadState();
+    update();
+    setInterval(update, 1000);
+
+    // Prefill with example if empty
+    if (!startInput.value || !endInput.value) {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+      const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 120); // +120 Tage
+      const toLocal = (d) => {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      if (!startInput.value) startInput.value = toLocal(start);
+      if (!endInput.value) endInput.value = toLocal(end);
+      saveState();
+      update();
+    }
+  </script>
+</body>
+</html>
