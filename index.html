@@ -213,6 +213,10 @@
           <div class="label">Prozent</div>
           <div class="value" id="percent-line">–</div>
         </div>
+		<div class="row">
+          <div class="label">Nächster Prozent</div>
+          <div class="value" id="npl">–</div>
+        </div>
         <div class="row">
           <div class="label">x/y vergingen</div>
           <div class="value" id="frac-line">–</div>
@@ -267,6 +271,7 @@
     const bar = el('bar');
     const timeLeft = el('time-left');
     const nowEl = el('now');
+	const npl = el('npl');
 
     const STORAGE_KEY = 'semester-tracker-v1';
 
@@ -345,13 +350,43 @@
       // Percent
       const pct = (elapsedMs / totalMs) * 100;
       percentLine.textContent = `${fmt2(pct)} % vergingen`;
+	  
+	  // Nächster Prozent
+	  const nextPct = Math.floor(pct) + 1;
+	  if (nextPct <= 100) {
+	    const nextMs = (nextPct / 100) * totalMs;
+	    const dateAtNext = new Date(start.getTime() + nextMs);
+
+	    const dateStr = dateAtNext.toLocaleDateString("de-DE", {  
+	  	  year: "numeric",
+	 	  month: "2-digit",
+	      day: "2-digit"
+	    });
+	    const timeStr = dateAtNext.toLocaleTimeString("de-DE", {
+		  hour: "2-digit",
+		  minute: "2-digit",
+		  second: "2-digit"
+	    });
+
+	    npl.textContent = `${nextPct}%: ${dateStr} ${timeStr}`;
+	  }
 
       // Fraction x/y (reduce based on rounded percent of 100)
       let P = pct.toFixed(2); // 0..100
       let num = P, den = 100;
+	  
+	  
+	  // so lange multiplizieren bis num ganzzahlig oder limit erreicht
+	  let factor = 1;
+	  while (num % 1 !== 0 && factor < 100) {
+		  num *= 10;
+		  den *= 10;
+		  factor *= 10;
+	  }
+	  
       const g = gcd(num, den);
       num = num / g; den = den / g;
-      fracLine.textContent = `${fmt2(num)} / ${fmt2(den)} vergingen`;
+      fracLine.textContent = `${num} / ${den} vergingen`;
 
       // Inverse fraction 1/y (1 / (100/P))
       let invY = (P === 0) ? Infinity : (100 / P);
