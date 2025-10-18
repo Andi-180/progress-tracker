@@ -237,10 +237,12 @@
           <div class="label">9/Sexteenway-Time:</div>
           <div class="value" id="swt-line">–</div>
         </div>
+		<!--
 		<div class="row">
           <div class="label">Halfway-Time:</div>
           <div class="value" id="hwt-line">–</div>
         </div>
+		-->
         <div class="progress" aria-label="Fortschrittsbalken">
           <div class="bar" id="bar"></div>
         </div>
@@ -401,7 +403,7 @@
 	  const sixteenTime = new Date(start.getTime() + (end - start) * 0.25 * 0.25 * 9);
 	  const eightTime = new Date(start.getTime() + (end - start) * 0.25 * 0.5 * 5);
 	  const quarterTime = new Date(start.getTime() + (end - start) * 0.25 * 3);
-	  const halfwayTime = new Date(start.getTime() + (end - start) * 0.5);
+	  //const halfwayTime = new Date(start.getTime() + (end - start) * 0.5);
 	  
 	  // Für sixteenTime
 	  document.querySelector("#swt-line").innerText = `${formatDateTime(sixteenTime)} — ${( (elapsedMs / totalMs) * 100 * 16 / 9  ).toFixed(2)}%`;
@@ -413,7 +415,7 @@
 	  document.querySelector("#qwt-line").innerText = `${formatDateTime(quarterTime)} — ${( (elapsedMs / totalMs) * 100 * 4 / 3 ).toFixed(2)}%`;
 
 	  // für Halfway
-	  document.querySelector("#hwt-line").innerText = `${formatDateTime(halfwayTime)} — ${( (elapsedMs / totalMs) * 100 * 2 ).toFixed(2)}%`;
+	  //document.querySelector("#hwt-line").innerText = `${formatDateTime(halfwayTime)} — ${( (elapsedMs / totalMs) * 100 * 2 ).toFixed(2)}%`;
 
       // Progress bar
       bar.style.width = `${(elapsedMs / totalMs) * 100}%`;
